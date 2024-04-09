@@ -13,12 +13,18 @@ public class CourseService {
     @Autowired
     private CourseRepository courseRepository;
 
+
+    public Optional<CourseDTO> getCourseById(Long id) {
+        return courseRepository.findById(id.intValue());
+    }
+
     public List<CourseDTO> getAllCourses() {
         return courseRepository.findAll();
     }
 
+
     public Optional<CourseDTO> getCourseById(int id) {
-        return courseRepository.findById(id);
+        return getCourseById((long) id);
     }
 
     public CourseDTO saveOrUpdateCourse(CourseDTO courseDTO) {

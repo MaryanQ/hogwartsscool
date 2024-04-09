@@ -17,6 +17,11 @@ public class HouseService {
         return houseRepository.findAll();
     }
 
+    public HouseDTO getHouseByName(String name) {
+        return houseRepository.findByName(name);
+    }
+
+
     public Optional<HouseDTO> getHouseById(int id) {
         return houseRepository.findById(Long.valueOf(id));
     }

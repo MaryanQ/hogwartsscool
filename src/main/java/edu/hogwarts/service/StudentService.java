@@ -5,6 +5,7 @@ import edu.hogwarts.dto.StudentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,22 +15,27 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public StudentDTO createStudent(StudentDTO studentDTO) {
+    public List<StudentDTO> findStudentsByName(String name) {
 
-        if (studentDTO.getFullName() != null && !studentDTO.getFullName().isEmpty()) {
-            String[] names = studentDTO.getFullName().split("\\s+");
-            if (names.length >= 1) {
-                studentDTO.setFirstName(names[0]);
-            }
-            if (names.length >= 2) {
-                studentDTO.setMiddleName(names[1]);
-            }
-            if (names.length >= 3) {
-                studentDTO.setLastName(names[2]);
-            }
+        return studentRepository.findByName(name);
+    }
+
+    public StudentDTO createStudent(StudentDTO studentDTO) {
+        if (studentDTO.getFullName() == null || studentDTO.getFullName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Full name cannot be empty");
         }
 
-        // Perform any additional logic before saving the student
+
+        String[] parts = studentDTO.getFullName().split("\\s+");
+        String firstName = parts[0];
+        String lastName = parts[parts.length - 1];
+        String middleName = (parts.length > 2) ? String.join(" ", Arrays.copyOfRange(parts, 1, parts.length - 1)) : "";
+
+
+        studentDTO.setFirstName(firstName);
+        studentDTO.setMiddleName(middleName);
+        studentDTO.setLastName(lastName);
+
         return studentRepository.save(studentDTO);
     }
 

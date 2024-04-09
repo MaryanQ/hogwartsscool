@@ -1,11 +1,14 @@
 package edu.hogwarts.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,45 +23,67 @@ public class StudentDTO {
     private String middleName;
     private String lastName;
     private LocalDate dateOfBirth;
+    @JsonIgnore
+    private String name;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String fullName;
 
     @JsonIgnore
-    private String fullName;
+    private Integer schoolYear;
+
+    private Boolean graduated;
+
+    private Integer graduationYear;
+
 
     @ManyToOne
     @JoinColumn(name = "house_id")
     private HouseDTO house;
 
-    // Constructor without house parameter
+    @ManyToMany
+    @JoinTable(name = "student_course",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private Set<CourseDTO> courses = new HashSet<>();
+
+
     public StudentDTO() {
     }
 
-    // Constructor with house parameter replaced by HouseDTO object
-    public StudentDTO(String firstName, String middleName, String lastName, LocalDate dateOfBirth, HouseDTO house, String fullName) {
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
+    public StudentDTO(String fullName, LocalDate dateOfBirth, HouseDTO house, Boolean graduated, Integer graduationYear) {
+        this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.house = house;
-        this.fullName = generateFullName(firstName, middleName, lastName);
+        this.graduated = graduated;
+        this.graduationYear = graduationYear;
+        parseFullName(fullName);
     }
 
-    private String generateFullName(String firstName, String middleName, String lastName) {
-        StringBuilder fullNameBuilder = new StringBuilder();
-        if (firstName != null && !firstName.isEmpty()) {
-            fullNameBuilder.append(firstName);
-        }
-        if (middleName != null && !middleName.isEmpty()) {
-            if (!fullNameBuilder.isEmpty()) {
-                fullNameBuilder.append(" ");
-            }
-            fullNameBuilder.append(middleName);
-        }
-        if (lastName != null && !lastName.isEmpty()) {
-            if (!fullNameBuilder.isEmpty()) {
-                fullNameBuilder.append(" ");
-            }
-            fullNameBuilder.append(lastName);
-        }
-        return fullNameBuilder.toString();
+    public String getHouse() {
+        return house != null ? house.getName() : null;
     }
-}
+
+    private void parseFullName(String fullName) {
+        String[] parts = fullName.split("\\s+");
+        if (parts.length >= 1) {
+            this.firstName = parts[0];
+        }
+        if (parts.length >= 2) {
+            this.lastName = parts[parts.length - 1];
+            StringBuilder middleNameBuilder = new StringBuilder();
+            for (int i = 1; i < parts.length - 1; i++) {
+                if (i > 1) {
+                    middleNameBuilder.append(" ");
+                }
+                middleNameBuilder.append(parts[i]);
+            }
+            this.middleName = middleNameBuilder.toString();
+        }
+    }
+    }
+
+
+
+
+

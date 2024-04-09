@@ -30,4 +30,9 @@ public class HouseDTO {
         this.founder = founder;
         this.colors = colors;
     }
+
+    public void setHouseName(String name) {
+        this.name = name;
+    }
+
 }
